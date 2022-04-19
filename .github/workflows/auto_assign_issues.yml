@@ -13,7 +13,7 @@ jobs:
         uses: leonsteinhaeuser/project-beta-automations@v1.0.3
         with:
           gh_token: ${{ secrets.PROJECT_ACCESS_TOKEN }}
-          organization: badi-bot
+          organization: devcodeabode
           project_id: 2
           resource_node_id: ${{ github.event.issue.node_id }}
           status_value: "Idea"
