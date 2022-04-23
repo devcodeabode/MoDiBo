@@ -1,8 +1,8 @@
 {
-  "name": "discordjs-bot-bootstrap",
+  "name": "modibo",
   "version": "1.0.0",
-  "description": "",
-  "main": "main.js",
+  "description": "Modular Discord Bot",
+  "main": "src/main.js",
   "scripts": {
     "start": "cd src && node ./main.js",
     "update": "make update",
@@ -11,14 +11,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/devcodeabode/discordjs-bot-bootstrap.git"
+    "url": "git+https://github.com/devcodeabode/MoDiBo.git"
   },
-  "author": "Joshua Maxwell, Brandon Ingli",
-  "license": "ISC",
+  "author": "devcodeabode",
+  "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/devcodeabode/discordjs-bot-bootstrap/issues"
+    "url": "https://github.com/devcodeabode/MoDiBo/issues"
   },
-  "homepage": "https://github.com/devcodeabode/discordjs-bot-bootstrap#readme",
+  "homepage": "https://github.com/devcodeabode/MoDiBo#modibo",
   "dependencies": {
     "@discordjs/builders": "^0.9.0",
     "@discordjs/rest": "^0.1.0-canary.0",
