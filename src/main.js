@@ -88,7 +88,7 @@ utils.logger = winston.createLogger({
 // config must be loaded after the logger is initialized
 config = loadConfig();
 
-if (config.discordLogging.active) {
+if (config.discordLogging.active ?? true) {
   utils.logger.add(
     new winstonDiscord({
       id: webhookParts[1],
