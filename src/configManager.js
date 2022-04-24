@@ -35,11 +35,11 @@ function initConfig() {
 
 function loadConfig() {
   try {
-    config = JSON.parse(
+    module.exports.config = JSON.parse(
       fs.readFileSync("../config.json", { encoding: "utf8", flag: "r" })
     );
   } catch (error) {
-    config = initConfig();
+    module.exports.config = initConfig();
   }
 }
 

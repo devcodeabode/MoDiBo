@@ -13,7 +13,7 @@ const winston = require("winston");
 const winstonDiscord = require("./CustomDiscordWebhookTransport.js");
 const winstonRotateFile = require("winston-daily-rotate-file");
 const utils = require("./utils.js");
-let { config, loadConfig } = require("./configManager");
+const configManager = require("./configManager");
 
 // Logger setup
 const webhookRegex = new RegExp(
@@ -86,14 +86,15 @@ utils.logger = winston.createLogger({
 });
 
 // config must be loaded after the logger is initialized
-config = loadConfig();
+configManager.loadConfig();
+console.log(configManager.config);
 
-if (config.discordLogging.active ?? true) {
+if (configManager.config.discordLogging.active ?? true) {
   utils.logger.add(
     new winstonDiscord({
       id: webhookParts[1],
       token: webhookParts[2],
-      level: config.discordLogging.level,
+      level: configManager.config.discordLogging.level ?? "warn",
       format: winston.format.combine(
         winston.format.timestamp({
           format: "YYYY-MM-DD HH:mm:ss",
@@ -121,8 +122,8 @@ const bot = new Client({
 
 bot.on("ready", async () => {
   // when loaded (ready event)
-  bot.user.setActivity(config.activity.description, {
-    type: config.activity.type.toUpperCase(),
+  bot.user.setActivity(configManager.config.activity.description ?? "nil", {
+    type: configManager.config.activity.type.toUpperCase() ?? "PLAYING",
   });
   utils.logger.log("debug", `${bot.user.username} is ready...`);
   console.log(`${bot.user.username} is ready...`);
@@ -141,7 +142,7 @@ bot.on("messageCreate", async (message) => {
   }
 
   // if it is a command
-  if (message.content.charAt(0) === config.prefix) {
+  if (message.content.charAt(0) === configManager.config.prefix ?? "$") {
     //TODO
     message.content.slice(1) === "err"
       ? utils.logger.error("This is an error!")
