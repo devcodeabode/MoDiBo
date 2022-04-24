@@ -8,7 +8,7 @@ const defaultConfig = {
   activity: { type: "playing", description: "$help" },
   color: "purple",
   plugins: {},
-  discordLogging: { active: "true", level: "warn" },
+  discordLogging: { active: true, level: "warn" },
 };
 
 function initConfig() {
@@ -23,13 +23,23 @@ function initConfig() {
   return defaultConfig;
 }
 
+// function loadConfig() {
+//   try {
+//     return JSON.parse(
+//       fs.readFileSync("../config.json", { encoding: "utf8", flag: "r" })
+//     );
+//   } catch (error) {
+//     return initConfig();
+//   }
+// }
+
 function loadConfig() {
   try {
-    return JSON.parse(
+    config = JSON.parse(
       fs.readFileSync("../config.json", { encoding: "utf8", flag: "r" })
     );
   } catch (error) {
-    return initConfig();
+    config = initConfig();
   }
 }
 

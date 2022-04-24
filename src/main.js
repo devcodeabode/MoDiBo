@@ -6,7 +6,7 @@
 
 // dependencies
 require("dotenv").config({
-  path: process.argv.includes("--testing") ? "./.env.testing" : "./.env",
+  path: process.argv.includes("--testing") ? "../.env.testing" : "../.env",
 });
 const { Client, Intents } = require("discord.js");
 const winston = require("winston");
@@ -88,7 +88,7 @@ utils.logger = winston.createLogger({
 // config must be loaded after the logger is initialized
 config = loadConfig();
 
-if (config.discordLogging.active.toUpperCase() === "TRUE") {
+if (config.discordLogging.active) {
   utils.logger.add(
     new winstonDiscord({
       id: webhookParts[1],
