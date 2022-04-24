@@ -125,6 +125,7 @@ bot.on("ready", async () => {
     type: config.activity.type.toUpperCase(),
   });
   utils.logger.log("debug", `${bot.user.username} is ready...`);
+  console.log(`${bot.user.username} is ready...`);
 });
 
 // on message recieved
