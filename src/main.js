@@ -13,8 +13,7 @@ const winston = require("winston");
 const winstonDiscord = require("./CustomDiscordWebhookTransport.js");
 const winstonRotateFile = require("winston-daily-rotate-file");
 const utils = require("./utils.js");
-
-const PREFIX = "$";
+let { config, loadConfig } = require("./configManager");
 
 // Logger setup
 const webhookRegex = new RegExp(
@@ -34,20 +33,6 @@ utils.logger = winston.createLogger({
       level: consoleLogLevel,
       format: winston.format.combine(
         winston.format.colorize(),
-        winston.format.timestamp({
-          format: "YYYY-MM-DD HH:mm:ss",
-        }),
-        winston.format.printf(
-          (info) => `[${info.timestamp}] [${info.level}] ${info.message}`
-        )
-      ),
-      handleExceptions: true,
-    }),
-    new winstonDiscord({
-      id: webhookParts[1],
-      token: webhookParts[2],
-      level: "warn",
-      format: winston.format.combine(
         winston.format.timestamp({
           format: "YYYY-MM-DD HH:mm:ss",
         }),
@@ -100,6 +85,28 @@ utils.logger = winston.createLogger({
   ],
 });
 
+// config must be loaded after the logger is initialized
+config = loadConfig();
+
+if (config.discordLogging.active.toUpperCase() === "TRUE") {
+  utils.logger.add(
+    new winstonDiscord({
+      id: webhookParts[1],
+      token: webhookParts[2],
+      level: config.discordLogging.level,
+      format: winston.format.combine(
+        winston.format.timestamp({
+          format: "YYYY-MM-DD HH:mm:ss",
+        }),
+        winston.format.printf(
+          (info) => `[${info.timestamp}] [${info.level}] ${info.message}`
+        )
+      ),
+      handleExceptions: true,
+    })
+  );
+}
+
 // starting the bot
 const bot = new Client({
   intents: [
@@ -114,7 +121,9 @@ const bot = new Client({
 
 bot.on("ready", async () => {
   // when loaded (ready event)
-  bot.user.setActivity(`${PREFIX}help | ${PREFIX}info`, { type: "PLAYING" });
+  bot.user.setActivity(config.activity.description, {
+    type: config.activity.type.toUpperCase(),
+  });
   utils.logger.log("debug", `${bot.user.username} is ready...`);
 });
 
@@ -131,9 +140,13 @@ bot.on("messageCreate", async (message) => {
   }
 
   // if it is a command
-  if (message.content.charAt(0) === PREFIX) {
+  if (message.content.charAt(0) === config.prefix) {
     //TODO
-    utils.reply("Hello!", message);
+    message.content.slice(1) === "err"
+      ? utils.logger.error("This is an error!")
+      : message.content.slice(1) === "info"
+      ? utils.logger.log("info", "This is an info!")
+      : utils.reply("Hello!", message);
     return;
   }
 });
