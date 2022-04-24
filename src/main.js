@@ -87,7 +87,6 @@ utils.logger = winston.createLogger({
 
 // config must be loaded after the logger is initialized
 configManager.loadConfig();
-console.log(configManager.config);
 
 if (configManager.config.discordLogging.active ?? true) {
   utils.logger.add(
@@ -126,7 +125,7 @@ bot.on("ready", async () => {
     type: configManager.config.activity.type.toUpperCase() ?? "PLAYING",
   });
   utils.logger.log("debug", `${bot.user.username} is ready...`);
-  console.log(`${bot.user.username} is ready...`);
+  console.info(`${bot.user.username} is ready...`);
 });
 
 // on message recieved
