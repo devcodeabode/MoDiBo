@@ -13,6 +13,7 @@ const winston = require("winston");
 const winstonDiscord = require("./CustomDiscordWebhookTransport.js");
 const winstonRotateFile = require("winston-daily-rotate-file");
 const utils = require("./utils.js");
+const pluginManager = require("./plugin-manager.js");
 
 const PREFIX = "$";
 
@@ -115,6 +116,9 @@ const bot = new Client({
 bot.on("ready", async () => {
   // when loaded (ready event)
   bot.user.setActivity(`${PREFIX}help | ${PREFIX}info`, { type: "PLAYING" });
+
+  pluginManager.load();
+
   utils.logger.log("debug", `${bot.user.username} is ready...`);
 });
 
