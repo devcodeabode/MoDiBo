@@ -85,7 +85,9 @@ if (process.argv.includes("--reset-config")) {
 
 // Just log the default config
 if (process.argv.includes("--show-default-config")) {
-  configManager.logDefaultConfig();
+  utils.logger.warn(
+    `DEFAULT CONFIG:\n${JSON.stringify(configManager.defaultConfig, null, 2)}`
+  );
   utils.logger.log("debug", "Exiting.");
   process.exit(0);
 }

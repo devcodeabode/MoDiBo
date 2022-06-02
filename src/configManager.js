@@ -16,12 +16,6 @@ function initConfig() {
   return defaultConfig;
 }
 
-function logDefaultConfig() {
-  utils.logger.warn(
-    `DEFAULT CONFIG: \n${JSON.stringify(defaultConfig, null, 2)}`
-  );
-}
-
 function loadConfig() {
   try {
     module.exports.config = JSON.parse(
@@ -36,4 +30,4 @@ function loadConfig() {
   }
 }
 
-module.exports = { loadConfig, logDefaultConfig, initConfig, config };
+module.exports = { loadConfig, defaultConfig, initConfig, config };
