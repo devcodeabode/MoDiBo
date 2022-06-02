@@ -5,9 +5,13 @@
   "main": "src/main.js",
   "scripts": {
     "start": "cd src && node ./main.js",
+    "testing": "cd src && node  --trace-deprecation --trace-warnings ./main.js --testing",
+    "dev": "npm run testing",
     "update": "make update",
     "clean": "make clean",
-    "cleanLogs": "make cleanLogs"
+    "cleanLogs": "make cleanLogs",
+    "resetConfig": "cd src && node ./main.js --reset-config",
+    "showDefaultConfig": "cd src && node ./main.js --show-default-config"
   },
   "repository": {
     "type": "git",

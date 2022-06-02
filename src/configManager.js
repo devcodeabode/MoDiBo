@@ -1,4 +1,4 @@
-const utils = require * "./utils.js";
+const utils = require("./utils.js");
 const fs = require("fs");
 
 let config;
@@ -12,26 +12,15 @@ const defaultConfig = {
 };
 
 function initConfig() {
-  fs.writeFile("../config.json", JSON.stringify(defaultConfig), function (err) {
-    if (err) throw "Error auto-generating configuration file.";
-    utils.logger.log(
-      "warn",
-      `config.json not found. Generating new configuration file...`
-    );
-  });
-
+  fs.writeFileSync("../config.json", JSON.stringify(defaultConfig, null, 2));
   return defaultConfig;
 }
 
-// function loadConfig() {
-//   try {
-//     return JSON.parse(
-//       fs.readFileSync("../config.json", { encoding: "utf8", flag: "r" })
-//     );
-//   } catch (error) {
-//     return initConfig();
-//   }
-// }
+function logDefaultConfig() {
+  utils.logger.warn(
+    `DEFAULT CONFIG: \n${JSON.stringify(defaultConfig, null, 2)}`
+  );
+}
 
 function loadConfig() {
   try {
@@ -39,8 +28,12 @@ function loadConfig() {
       fs.readFileSync("../config.json", { encoding: "utf8", flag: "r" })
     );
   } catch (error) {
+    utils.logger.log(
+      "warn",
+      `config.json not found. Generating new configuration file...`
+    );
     module.exports.config = initConfig();
   }
 }
 
-module.exports = { loadConfig, config };
+module.exports = { loadConfig, logDefaultConfig, initConfig, config };
