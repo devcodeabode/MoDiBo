@@ -145,7 +145,7 @@ bot.on("ready", async () => {
   // when loaded (ready event)
   let desc;
   let type;
-  if (!"activity" in configManager.config) {
+  if (!("activity" in configManager.config)) {
     desc = "nil";
     type = "PLAYING";
   } else {
