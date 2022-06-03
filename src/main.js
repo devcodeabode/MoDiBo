@@ -6,25 +6,14 @@
 
 // dependencies
 require("dotenv").config({
-  path: process.argv.includes("--testing") ? "./.env.testing" : "./.env",
+  path: process.argv.includes("--testing") ? "../.env.testing" : "../.env",
 });
 const { Client, Intents } = require("discord.js");
 const winston = require("winston");
 const winstonDiscord = require("./CustomDiscordWebhookTransport.js");
 const winstonRotateFile = require("winston-daily-rotate-file");
 const utils = require("./utils.js");
-
-const PREFIX = "$";
-
-// Logger setup
-const webhookRegex = new RegExp(
-  /^https:\/\/discord.com\/api\/webhooks\/(.+)\/(.+)$/,
-  "g"
-);
-const webhookParts = webhookRegex.exec(process.env.WINSTON_DISCORD_WEBHOOK);
-if (!webhookParts) {
-  throw "Bad Discord Webhook";
-}
+const configManager = require("./configManager");
 
 const consoleLogLevel = process.env.CONSOLE_LOG_LEVEL ?? "warn";
 
@@ -34,20 +23,6 @@ utils.logger = winston.createLogger({
       level: consoleLogLevel,
       format: winston.format.combine(
         winston.format.colorize(),
-        winston.format.timestamp({
-          format: "YYYY-MM-DD HH:mm:ss",
-        }),
-        winston.format.printf(
-          (info) => `[${info.timestamp}] [${info.level}] ${info.message}`
-        )
-      ),
-      handleExceptions: true,
-    }),
-    new winstonDiscord({
-      id: webhookParts[1],
-      token: webhookParts[2],
-      level: "warn",
-      format: winston.format.combine(
         winston.format.timestamp({
           format: "YYYY-MM-DD HH:mm:ss",
         }),
@@ -100,6 +75,60 @@ utils.logger = winston.createLogger({
   ],
 });
 
+// Deal with just generating a config
+if (process.argv.includes("--reset-config")) {
+  utils.logger.warn("Resetting to default configuration.");
+  configManager.initConfig();
+  utils.logger.log("debug", "Configuration reset. Exiting.");
+  process.exit(0);
+}
+
+// Just log the default config
+if (process.argv.includes("--show-default-config")) {
+  utils.logger.warn(
+    `DEFAULT CONFIG:\n${JSON.stringify(configManager.defaultConfig, null, 2)}`
+  );
+  utils.logger.log("debug", "Exiting.");
+  process.exit(0);
+}
+
+// config must be loaded after the logger is initialized
+configManager.loadConfig();
+
+if (
+  "discordLogging" in configManager.config &&
+  (configManager.config.discordLogging.active ?? true)
+) {
+  // Logger setup
+  const webhookRegex = new RegExp(
+    /^https:\/\/discord.com\/api\/webhooks\/(.+)\/(.+)$/,
+    "g"
+  );
+  const webhookParts = webhookRegex.exec(process.env.WINSTON_DISCORD_WEBHOOK);
+  if (!webhookParts) {
+    utils.logger.warn(
+      "Invalid Discord Webhook provided. Not enabling Discord logging."
+    );
+  } else {
+    utils.logger.add(
+      new winstonDiscord({
+        id: webhookParts[1],
+        token: webhookParts[2],
+        level: configManager.config.discordLogging.level || "warn",
+        format: winston.format.combine(
+          winston.format.timestamp({
+            format: "YYYY-MM-DD HH:mm:ss",
+          }),
+          winston.format.printf(
+            (info) => `[${info.timestamp}] [${info.level}] ${info.message}`
+          )
+        ),
+        handleExceptions: true,
+      })
+    );
+  }
+}
+
 // starting the bot
 const bot = new Client({
   intents: [
@@ -114,8 +143,20 @@ const bot = new Client({
 
 bot.on("ready", async () => {
   // when loaded (ready event)
-  bot.user.setActivity(`${PREFIX}help | ${PREFIX}info`, { type: "PLAYING" });
+  let desc;
+  let type;
+  if (!("activity" in configManager.config)) {
+    desc = "nil";
+    type = "PLAYING";
+  } else {
+    desc = configManager.config.activity.description || "nil";
+    type = (configManager.config.activity.type || "PLAYING").toUpperCase();
+  }
+  bot.user.setActivity(desc, {
+    type: type,
+  });
   utils.logger.log("debug", `${bot.user.username} is ready...`);
+  console.info(`${bot.user.username} is ready...`);
 });
 
 // on message recieved
@@ -131,9 +172,22 @@ bot.on("messageCreate", async (message) => {
   }
 
   // if it is a command
-  if (message.content.charAt(0) === PREFIX) {
+  if (message.content.charAt(0) === (configManager.config.prefix || "$")) {
     //TODO
-    utils.reply("Hello!", message);
+    message.content.slice(1) === "err"
+      ? utils.logger.error("This is an error!")
+      : message.content.slice(1) === "info"
+      ? utils.logger.log("info", "This is an info!")
+      : utils.reply(
+          utils.createEmbed(
+            "Hello!",
+            "This is a test message.",
+            false,
+            message.author.username,
+            message.author.avatarURL()
+          ),
+          message
+        );
     return;
   }
 });
