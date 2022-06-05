@@ -14,7 +14,7 @@ const winstonDiscord = require("./CustomDiscordWebhookTransport.js");
 const winstonRotateFile = require("winston-daily-rotate-file");
 const utils = require("./utils.js");
 const configManager = require("./configManager");
-
+const pluginManager = require("./pluginManager.js");
 const consoleLogLevel = process.env.CONSOLE_LOG_LEVEL ?? "warn";
 
 utils.logger = winston.createLogger({
@@ -155,6 +155,9 @@ bot.on("ready", async () => {
   bot.user.setActivity(desc, {
     type: type,
   });
+  pluginManager.load();
+  utils.logger.log("debug", "Starting Crons...");
+  pluginManager.startCrons();
   utils.logger.log("debug", `${bot.user.username} is ready...`);
   console.info(`${bot.user.username} is ready...`);
 });

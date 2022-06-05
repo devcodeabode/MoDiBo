@@ -17,6 +17,13 @@ const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 const HOUR = 60 * MINUTE;
 
+// Loaded Plugin storage
+let plugins = {
+  command: {},
+  message: {},
+  cron: {},
+};
+
 /**
  * Send a message to a channel of your choice.
  * @param {Discord.MessageEmbed|String} content The content to include in the message.
@@ -142,4 +149,5 @@ module.exports = {
   reply,
   createEmbed,
   logger,
+  plugins,
 };
