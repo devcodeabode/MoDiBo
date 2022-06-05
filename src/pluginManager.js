@@ -1,5 +1,6 @@
 const glob = require("glob");
 const utils = require("./utils.js");
+const configManager = require("./configManager.js");
 const PLUGIN_FILES = "../plugins/*/main.js";
 
 /**
@@ -10,6 +11,13 @@ function load(bot) {
   //TODO Integrate with Config to only load enabled plugins
 
   utils.logger.log("debug", "Loading Plugins...");
+
+  if (!("plugins" in configManager.config)) {
+    utils.logger.warn(
+      "No plugin configuration found. Not attempting to load any plugins."
+    );
+    return;
+  }
 
   glob.sync(PLUGIN_FILES).forEach((file) => {
     let dash = file.split("/");
@@ -25,6 +33,14 @@ function load(bot) {
     let module = require(file);
     let key = module.SLUG;
     let loaded = false;
+
+    if (!(key in configManager.config.plugins)) {
+      utils.logger.log(
+        "debug",
+        `Not loading Plugin "${module.NAME}", as it's not enabled in the config.`
+      );
+      return;
+    }
 
     if (module.processCommand) {
       utils.plugins.command[key] = module;

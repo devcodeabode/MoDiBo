@@ -14,7 +14,7 @@ const winstonDiscord = require("./CustomDiscordWebhookTransport.js");
 const winstonRotateFile = require("winston-daily-rotate-file");
 const utils = require("./utils.js");
 const configManager = require("./configManager");
-const pluginManager = require("./plugin-manager.js");
+const pluginManager = require("./pluginManager.js");
 const consoleLogLevel = process.env.CONSOLE_LOG_LEVEL ?? "warn";
 
 utils.logger = winston.createLogger({
