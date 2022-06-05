@@ -78,6 +78,13 @@ function load(bot) {
   }
 }
 
+function startCrons() {
+  utils.plugins.cron.forEach((plugin) => {
+    plugin.startCron();
+  });
+}
+
 module.exports = {
   load,
+  startCrons,
 };

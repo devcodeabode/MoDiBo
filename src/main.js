@@ -156,6 +156,8 @@ bot.on("ready", async () => {
     type: type,
   });
   pluginManager.load();
+  utils.logger.log("debug", "Starting Crons...");
+  pluginManager.startCrons();
   utils.logger.log("debug", `${bot.user.username} is ready...`);
   console.info(`${bot.user.username} is ready...`);
 });
