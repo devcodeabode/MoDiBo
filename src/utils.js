@@ -3,6 +3,7 @@
  */
 
 const Discord = require("discord.js");
+const configManager = require("./configManager");
 let logger;
 
 const COLORS = {
@@ -118,7 +119,7 @@ async function reply(content, message, mention = false) {
  * @param {boolean} [monotype=false] True if the content should be monospace (```yaml).
  * @param {string} [footer=null] Footer text of the embed.
  * @param {string} [footerImageURL=null] Fully qualified URL to image to include in footer.
- * @param {Utils.COLORS} [color=COLORS.GREEN] Color for the embed. If not defined in enum, embed will be green.
+ * @param {Utils.COLORS} [color=COLORS.GREEN] Color for the embed. If not defined in enum, embed will the color set in the config, or Green if that doesn't exist.
  * @returns {Discord.MessageEmbed} Embed to send on via another function.
  */
 function createEmbed(
@@ -127,7 +128,7 @@ function createEmbed(
   monotype = false,
   footer = null,
   footerImageURL = null,
-  color = COLORS.GREEN
+  color = COLORS[(configManager.config.color ?? "GREEN").toUpperCase()]
 ) {
   if (!Object.values(COLORS).includes(color)) {
     color = COLORS.GREEN;
