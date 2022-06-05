@@ -79,9 +79,9 @@ function load(bot) {
 }
 
 function startCrons() {
-  utils.plugins.cron.forEach((plugin) => {
-    plugin.startCron();
-  });
+  for (const plugin in utils.plugins.cron) {
+    utils.plugins.cron[plugin].startCron();
+  }
 }
 
 module.exports = {
