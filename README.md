@@ -12,7 +12,6 @@ MoDiBo is a Discord bot used to automate server management, boost member activit
 
 - [NodeJS >= 16.6.0](https://nodejs.org/en/download/) with `npm`
 - `git`
-- For some functionality, [GNU Make](https://www.gnu.org/software/make/)
 
 ### Install and Setup
 
