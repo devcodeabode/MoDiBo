@@ -26,3 +26,10 @@ assignees: ''
 **Additional context**
 <!-- Add any other context or screenshots about the feature request here. -->
 <!-- WARNING: Make sure no sensitive info is included, such as webhook URLs! -->
+
+**Dependencies**
+<!-- If this issue depends on another one being resolved, link those issues here and apply a `Blocked` label. -->
+<!-- Be sure to explain the dependency! -->
+<!-- e.g. - [ ] #2 for Updating the Issue Template -->
+<!-- e.g. - [ ] devcodeabode/devcodeabode.github.io#2 for documentation to be added to the website -->
+- [ ]
