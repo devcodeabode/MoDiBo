@@ -7,9 +7,9 @@
     "start": "cd src && node ./main.js",
     "testing": "cd src && node  --trace-deprecation --trace-warnings ./main.js --testing",
     "dev": "npm run testing",
-    "update": "make update",
-    "clean": "make clean",
-    "cleanLogs": "make cleanLogs",
+    "update": "git checkout . && git checkout main && git pull && npm ci",
+    "clean": "git reset --hard && git clean -fdx -e \".env\" -e \".env.testing\" -e \"*.log\" -e \"*-audit.json\" && git checkout main && git pull && npm ci",
+    "cleanLogs": "rm src/combined*log && rm src/combined-audit.json && rm src/error*log && rm src/error-audit.json",
     "resetConfig": "cd src && node ./main.js --reset-config",
     "showDefaultConfig": "cd src && node ./main.js --show-default-config"
   },
