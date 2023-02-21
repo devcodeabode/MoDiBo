@@ -130,7 +130,7 @@ function createEmbed(
     .setColor(color)
     .setTitle(`${title}`)
     .setDescription(monotype ? `\`\`\`yaml\n${content}\n\`\`\`` : `${content}`)
-    .setFooter(`${footer}`, footerImageURL);
+    .setFooter({ text: `${footer}`, iconURL: footerImageURL });
 }
 
 module.exports = {
