@@ -46,14 +46,12 @@ function load(bot) {
       utils.plugins.command[key] = module;
       loaded = true;
       utils.logger.log("debug", `Loaded "${module.NAME}" as a Command Plugin`);
-      utils.plugins.command[key].processCommand();
     }
 
     if (module.processMessage) {
       utils.plugins.message[key] = module;
       loaded = true;
       utils.logger.log("debug", `Loaded "${module.NAME}" as a Message Plugin`);
-      utils.plugins.message[key].processMessage();
     }
 
     if (module.startCron) {

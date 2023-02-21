@@ -168,6 +168,11 @@ bot.on("messageCreate", async (message) => {
     message = await message.fetch();
   }
 
+  // Send message on to plugins
+  for (plugin of Object.values(utils.plugins.message)) {
+    plugin.processMessage(bot, message);
+  }
+
   if (message.channel.type === "DM" && message.author.id != bot.user.id) {
     //TODO
     utils.reply("Hello!", message);
@@ -176,21 +181,18 @@ bot.on("messageCreate", async (message) => {
 
   // if it is a command
   if (message.content.charAt(0) === (configManager.config.prefix || "$")) {
-    //TODO
-    message.content.slice(1) === "err"
-      ? utils.logger.error("This is an error!")
-      : message.content.slice(1) === "info"
-      ? utils.logger.log("info", "This is an info!")
-      : utils.reply(
-          utils.createEmbed(
-            "Hello!",
-            "This is a test message.",
-            false,
-            message.author.username,
-            message.author.avatarURL()
-          ),
-          message
-        );
+    // Send command on to plugins
+    const command = message.content.split(/\s/)[0].toLowerCase().slice(1);
+    const args = message.content
+      .substring(message.content.split(/\s/)[0].length)
+      .slice(1);
+    for (plugin of Object.values(utils.plugins.command)) {
+      if (plugin.COMMANDS.includes(command)) {
+        plugin.processCommand(command, args, bot, message);
+        return;
+      }
+    }
+    utils.logger.log("debug", `No handler found for command ${command}`);
     return;
   }
 });
