@@ -136,3 +136,7 @@ dist
 .svelte-kit
 
 # End of https://www.toptal.com/developers/gitignore/api/node
+
+# Plugins (These are to be handled in separate repos)
+plugins/*
+!plugins/README.md
