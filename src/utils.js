@@ -10,6 +10,7 @@ const {
   EmbedBuilder,
   ActionRowBuilder,
 } = require("discord.js");
+const configManager = require("./configManager");
 let logger;
 
 const COLORS = {
@@ -138,7 +139,7 @@ const DEFAULT_EMBED = {
   monotype: false,
   footer: null,
   footerImageURL: null,
-  color: COLORS.GREEN,
+  color: null,
   additionalFields: [],
 };
 
@@ -152,7 +153,7 @@ const DEFAULT_EMBED = {
  * @param {string} options.monotype Wrap content in a yaml codeblock to display in monotype
  * @param {string} options.footer Footer text
  * @param {string} options.footerImageURL URL to an image to display in the footer next to the text
- * @param {COLORS} [options.color=COLORS.GREEN] Color for the embed.
+ * @param {COLORS} [options.color] Color for the embed. If not defined in enum, embed will the color set in the config, or Green if that doesn't exist.
  * @param {APIEmbedField[]} options.additionalFields Additional fields to display on the embed, up to 25
  * @param {string} options.additionalFields[].name Heading for the field
  * @param {string} options.additionalFields[].value Content for the field
@@ -163,7 +164,7 @@ function createEmbed(options = DEFAULT_EMBED) {
   options = { ...DEFAULT_EMBED, ...options };
 
   if (!Object.values(COLORS).includes(options.color)) {
-    options.color = COLORS.GREEN;
+    options.color = COLORS[(configManager.config.color ?? "GREEN").toUpperCase()]
   }
   return new EmbedBuilder()
     .setColor(options.color)
