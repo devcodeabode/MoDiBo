@@ -178,7 +178,7 @@ bot.on("messageCreate", async (message) => {
 
   // Send message on to plugins
   for (plugin of Object.values(utils.plugins.message)) {
-    plugin.processMessage(bot, message);
+    await plugin.processMessage(bot, message);
   }
 
   if (message.channel.type === "DM" && message.author.id != bot.user.id) {
@@ -196,7 +196,7 @@ bot.on("messageCreate", async (message) => {
       .slice(1);
     for (plugin of Object.values(utils.plugins.command)) {
       if (plugin.COMMANDS.includes(command)) {
-        plugin.processCommand(command, args, bot, message);
+        await plugin.processCommand(command, args, bot, message);
         return;
       }
     }
