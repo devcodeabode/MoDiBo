@@ -146,7 +146,7 @@ const bot = new Client({
     GatewayIntentBits.DirectMessages,
     GatewayIntentBits.DirectMessageReactions,
   ],
-  partials: [Partials.Channel],
+  partials: [Partials.Message, Partials.Channel, Partials.Reaction, Partials.User],
 });
 
 bot.on("ready", async () => {
@@ -211,6 +211,9 @@ bot.on("messageReactionAdd", async (reaction, user) => {
     // If the message this reaction belongs to was removed, the fetching might result in an API error which should be handled
     try {
       await reaction.fetch();
+      if (reaction.message.partial) {
+        await reaction.message.fetch();
+      }
     } catch (error) {
       utils.logger.error(
         `Something went wrong when fetching the message: ${error}`

@@ -184,6 +184,17 @@ function createEmbed(options = DEFAULT_EMBED) {
     .addFields(...options["additionalFields"]);
 }
 
+async function removeUserReaction(message, user, emojiName) {
+  const reactions = message.reactions.cache.filter(r => r.users.cache.has(user.id) && r.emoji.name === emojiName);
+  for (const r of reactions.values()) {
+    try {
+      await r.users.remove(user.id)
+    } catch (e) {
+      // Do nothing
+    }
+  }
+}
+
 module.exports = {
   SECOND,
   MINUTE,
@@ -195,4 +206,5 @@ module.exports = {
   createEmbed,
   logger,
   plugins,
+  removeUserReaction
 };
