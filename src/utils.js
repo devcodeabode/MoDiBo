@@ -30,6 +30,7 @@ let plugins = {
   command: {},
   message: {},
   cron: {},
+  reaction: {}
 };
 
 const DEFAULT_MESSAGE = {

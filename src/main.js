@@ -220,7 +220,9 @@ bot.on("messageReactionAdd", async (reaction, user) => {
     }
   }
 
-  //TODO
+  for (plugin of Object.values(utils.plugins.reaction)) {
+    await plugin.processReaction(bot, reaction, true);
+  }
 });
 
 bot.on("messageReactionRemove", async (reaction, user) => {
@@ -238,7 +240,9 @@ bot.on("messageReactionRemove", async (reaction, user) => {
     }
   }
 
-  //TODO
+  for (plugin of Object.values(utils.plugins.reaction)) {
+    await plugin.processReaction(bot, reaction, false);
+  }
 });
 
 // brings the bot online

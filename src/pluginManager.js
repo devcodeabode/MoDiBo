@@ -42,25 +42,31 @@ function load(bot) {
       return;
     }
 
-    if (module.processCommand) {
+    if (module?.processCommand) {
       utils.plugins.command[key] = module;
       loaded = true;
       utils.logger.log("debug", `Loaded "${module.NAME}" as a Command Plugin`);
     }
 
-    if (module.processMessage) {
+    if (module?.processMessage) {
       utils.plugins.message[key] = module;
       loaded = true;
       utils.logger.log("debug", `Loaded "${module.NAME}" as a Message Plugin`);
     }
 
-    if (module.startCron) {
+    if (module?.processReaction) {
+      utils.plugins.reaction[key] = module;
+      loaded = true;
+      utils.logger.log("debug", `Loaded "${module.NAME}" as a Reaction Plugin`);
+    }
+
+    if (module?.startCron) {
       utils.plugins.cron[key] = module;
       loaded = true;
       utils.logger.log("debug", `Loaded "${module.NAME}" as a Cron Plugin`);
     }
 
-    if (loaded && module.onLoad) {
+    if (loaded && module?.onLoad) {
       utils.logger.log("debug", `Running "${module.NAME}" onLoad function...`);
       module.onLoad(bot);
     }
