@@ -221,7 +221,7 @@ bot.on("messageReactionAdd", async (reaction, user) => {
   }
 
   for (plugin of Object.values(utils.plugins.reaction)) {
-    await plugin.processReaction(bot, reaction, true);
+    await plugin.processReaction(bot, reaction, user, true);
   }
 });
 
@@ -241,7 +241,7 @@ bot.on("messageReactionRemove", async (reaction, user) => {
   }
 
   for (plugin of Object.values(utils.plugins.reaction)) {
-    await plugin.processReaction(bot, reaction, false);
+    await plugin.processReaction(bot, reaction, user, false);
   }
 });
 
