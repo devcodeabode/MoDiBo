@@ -17,6 +17,7 @@ const COLORS = {
   PURPLE: 0x510c76,
   RED: 0xfc0004,
   GREEN: 0x00fc00,
+  BLUE: 0x000088
 };
 
 // Time Constants for convenience
@@ -168,15 +169,17 @@ function createEmbed(options = DEFAULT_EMBED) {
   }
   return new EmbedBuilder()
     .setColor(options.color)
-    .setTitle(`${options.title}`)
+    .setTitle(options?.title ? `${options.title}` : null)
     .setImage(options.image)
     .setThumbnail(options.thumbnail)
     .setDescription(
-      options.monotype
-        ? `\`\`\`yaml\n${options.content}\n\`\`\``
-        : `${options.content}`
+      options?.content
+        ? options?.monotype
+          ? `\`\`\`yaml\n${options.content}\n\`\`\``
+          : `${options.content}`
+        : null
     )
-    .setFooter({ text: `${options.footer}`, iconURL: options.footerImageURL })
+    .setFooter({ text: options?.footer ? `${options.footer}` : null, iconURL: options.footerImageURL })
     .addFields(...options["additionalFields"]);
 }
 
