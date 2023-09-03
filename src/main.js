@@ -5,9 +5,11 @@
  */
 
 // dependencies
-require("dotenv").config({
+import dotenv from 'dotenv';
+dotenv.config({
   path: process.argv.includes("--testing") ? "../.env.testing" : "../.env",
 });
+import djs from 'discord.js';
 const {
   Client,
   Intents,
@@ -15,16 +17,16 @@ const {
   Partials,
   ChannelType,
   ActivityType,
-} = require("discord.js");
-const winston = require("winston");
-const winstonDiscord = require("./CustomDiscordWebhookTransport.js");
-const winstonRotateFile = require("winston-daily-rotate-file");
-const utils = require("./utils.js");
-const configManager = require("./configManager");
-const pluginManager = require("./pluginManager.js");
+} = djs;
+import winston from "winston";
+import winstonDiscord from "./CustomDiscordWebhookTransport.js";
+import winstonRotateFile from "winston-daily-rotate-file";
+import { logger, setLogger, plugins, reply } from "./utils.js";
+import { loadConfig, defaultConfig, initConfig, config } from "./configManager.js";
+import pluginManager from "./pluginManager.js";
 const consoleLogLevel = process.env.CONSOLE_LOG_LEVEL ?? "warn";
 
-utils.logger = winston.createLogger({
+setLogger(winston.createLogger({
   transports: [
     new winston.transports.Console({
       level: consoleLogLevel,
@@ -80,31 +82,30 @@ utils.logger = winston.createLogger({
       ),
     }),
   ],
-});
+}));
 
 // Deal with just generating a config
 if (process.argv.includes("--reset-config")) {
-  utils.logger.warn("Resetting to default configuration.");
-  configManager.initConfig();
-  utils.logger.log("debug", "Configuration reset. Exiting.");
+  logger.warn("Resetting to default configuration.");
+  initConfig();
+  logger.log("debug", "Configuration reset. Exiting.");
   process.exit(0);
 }
 
 // Just log the default config
 if (process.argv.includes("--show-default-config")) {
-  utils.logger.warn(
-    `DEFAULT CONFIG:\n${JSON.stringify(configManager.defaultConfig, null, 2)}`
+  logger.warn(
+    `DEFAULT CONFIG:\n${JSON.stringify(defaultConfig, null, 2)}`
   );
-  utils.logger.log("debug", "Exiting.");
+  logger.log("debug", "Exiting.");
   process.exit(0);
 }
 
 // config must be loaded after the logger is initialized
-configManager.loadConfig();
-
+loadConfig();
 if (
-  "discordLogging" in configManager.config &&
-  (configManager.config.discordLogging.active ?? true)
+  "discordLogging" in config &&
+  (config.discordLogging.active ?? true)
 ) {
   // Logger setup
   const webhookRegex = new RegExp(
@@ -113,15 +114,15 @@ if (
   );
   const webhookParts = webhookRegex.exec(process.env.WINSTON_DISCORD_WEBHOOK);
   if (!webhookParts) {
-    utils.logger.warn(
+    logger.warn(
       "Invalid Discord Webhook provided. Not enabling Discord logging."
     );
   } else {
-    utils.logger.add(
+    logger.add(
       new winstonDiscord({
         id: webhookParts[1],
         token: webhookParts[2],
-        level: configManager.config.discordLogging.level || "warn",
+        level: config.discordLogging.level || "warn",
         format: winston.format.combine(
           winston.format.timestamp({
             format: "YYYY-MM-DD HH:mm:ss",
@@ -153,20 +154,20 @@ bot.on("ready", async () => {
   // when loaded (ready event)
   let desc;
   let type;
-  if (!("activity" in configManager.config)) {
+  if (!("activity" in config)) {
     desc = "nil";
     type = "PLAYING";
   } else {
-    desc = configManager.config.activity.description || "nil";
-    type = (configManager.config.activity.type || "PLAYING").toUpperCase();
+    desc = config.activity.description || "nil";
+    type = (config.activity.type || "PLAYING").toUpperCase();
   }
   bot.user.setActivity(desc, {
     type: type,
   });
   pluginManager.load();
-  utils.logger.log("debug", "Starting Crons...");
+  logger.log("debug", "Starting Crons...");
   pluginManager.startCrons();
-  utils.logger.log("debug", `${bot.user.username} is ready...`);
+  logger.log("debug", `${bot.user.username} is ready...`);
   console.info(`${bot.user.username} is ready...`);
 });
 
@@ -177,30 +178,30 @@ bot.on("messageCreate", async (message) => {
   }
 
   // Send message on to plugins
-  for (plugin of Object.values(utils.plugins.message)) {
+  for (const plugin of Object.values(plugins.message)) {
     await plugin.processMessage(bot, message);
   }
 
   if (message.channel.type === "DM" && message.author.id != bot.user.id) {
     //TODO
-    utils.reply({ content: "Hello!" }, message);
+    reply({ content: "Hello!" }, message);
     return;
   }
 
   // if it is a command
-  if (message.content.charAt(0) === (configManager.config.prefix || "$")) {
+  if (message.content.charAt(0) === (config.prefix || "$")) {
     // Send command on to plugins
     const command = message.content.split(/\s/)[0].toLowerCase().slice(1);
     const args = message.content
       .substring(message.content.split(/\s/)[0].length)
       .slice(1);
-    for (plugin of Object.values(utils.plugins.command)) {
+    for (const plugin of Object.values(plugins.command)) {
       if (plugin.COMMANDS.includes(command)) {
         await plugin.processCommand(command, args, bot, message);
         return;
       }
     }
-    utils.logger.log("debug", `No handler found for command ${command}`);
+    logger.log("debug", `No handler found for command ${command}`);
     return;
   }
 });
@@ -215,7 +216,7 @@ bot.on("messageReactionAdd", async (reaction, user) => {
         await reaction.message.fetch();
       }
     } catch (error) {
-      utils.logger.error(
+      logger.error(
         `Something went wrong when fetching the message: ${error}`
       );
       // Return as `reaction.message.author` may be undefined/null
@@ -223,7 +224,7 @@ bot.on("messageReactionAdd", async (reaction, user) => {
     }
   }
 
-  for (plugin of Object.values(utils.plugins.reaction)) {
+  for (const plugin of Object.values(plugins.reaction)) {
     await plugin.processReaction(bot, reaction, user, true);
   }
 });
@@ -235,7 +236,7 @@ bot.on("messageReactionRemove", async (reaction, user) => {
     try {
       await reaction.fetch();
     } catch (error) {
-      utils.logger.error(
+      logger.error(
         `Something went wrong when fetching the message: ${error}`
       );
       // Return as `reaction.message.author` may be undefined/null
@@ -243,7 +244,7 @@ bot.on("messageReactionRemove", async (reaction, user) => {
     }
   }
 
-  for (plugin of Object.values(utils.plugins.reaction)) {
+  for (const plugin of Object.values(plugins.reaction)) {
     await plugin.processReaction(bot, reaction, user, false);
   }
 });

@@ -1,5 +1,5 @@
-const utils = require("./utils.js");
-const fs = require("fs");
+import { logger } from './utils.js'
+import fs from 'fs';
 
 let config;
 
@@ -18,16 +18,16 @@ function initConfig() {
 
 function loadConfig() {
   try {
-    module.exports.config = JSON.parse(
+    config = JSON.parse(
       fs.readFileSync("../config.json", { encoding: "utf8", flag: "r" })
     );
   } catch (error) {
-    utils.logger.log(
+    logger.log(
       "warn",
       `config.json not found. Generating new configuration file...`
     );
-    module.exports.config = initConfig();
+    config = initConfig();
   }
 }
 
-module.exports = { loadConfig, defaultConfig, initConfig, config };
+export { loadConfig, defaultConfig, initConfig, config };

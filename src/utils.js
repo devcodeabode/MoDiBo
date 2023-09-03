@@ -2,15 +2,15 @@
  * Common Utilities
  */
 
-const {
+import {
   Client,
   GuildChannel,
   User,
   Message,
   EmbedBuilder,
   ActionRowBuilder,
-} = require("discord.js");
-const configManager = require("./configManager");
+} from "discord.js";
+import { config } from './configManager.js';
 let logger;
 
 const COLORS = {
@@ -94,10 +94,10 @@ async function send(content, channel, bot, mention = null) {
     channelObj = await bot.channels.fetch(channel);
   }
 
-  messageData = this.buildMessage(content, mention);
+  messageData = buildMessage(content, mention);
 
   // prettier-ignore
-  this.logger.log(
+  logger.log(
     "debug",
     `Sending message to channel #${channelObj.name} : ${JSON.stringify(messageData)}`
   );
@@ -127,7 +127,7 @@ async function reply(content, message, mention = false) {
   messageData.failIfNotExists = false;
 
   // prettier-ignore
-  this.logger.log(
+  logger.log(
     "debug",
     `Replying to ${message.url} : ${JSON.stringify(messageData)}`
   );
@@ -166,7 +166,7 @@ function createEmbed(options = DEFAULT_EMBED) {
   options = { ...DEFAULT_EMBED, ...options };
 
   if (!Object.values(COLORS).includes(options.color)) {
-    options.color = COLORS[(configManager.config.color ?? "GREEN").toUpperCase()]
+    options.color = COLORS[(config.color ?? "GREEN").toUpperCase()]
   }
   return new EmbedBuilder()
     .setColor(options.color)
@@ -195,7 +195,11 @@ async function removeUserReaction(message, user, emojiName) {
   }
 }
 
-module.exports = {
+function setLogger(newLogger) {
+  logger = newLogger
+}
+
+export {
   SECOND,
   MINUTE,
   HOUR,
@@ -206,5 +210,6 @@ module.exports = {
   createEmbed,
   logger,
   plugins,
-  removeUserReaction
+  removeUserReaction,
+  setLogger
 };

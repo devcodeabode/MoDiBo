@@ -1,6 +1,6 @@
-const glob = require("glob");
-const utils = require("./utils.js");
-const configManager = require("./configManager.js");
+import glob from 'glob';
+import { logger, plugins } from './utils.js';
+import { config } from './configManager.js'
 const PLUGIN_FILES = "../plugins/*/main.js";
 
 /**
@@ -10,16 +10,16 @@ const PLUGIN_FILES = "../plugins/*/main.js";
 function load(bot) {
   //TODO Integrate with Config to only load enabled plugins
 
-  utils.logger.log("debug", "Loading Plugins...");
+  logger.log("debug", "Loading Plugins...");
 
-  if (!("plugins" in configManager.config)) {
-    utils.logger.warn(
+  if (!("plugins" in config)) {
+    logger.warn(
       "No plugin configuration found. Not attempting to load any plugins."
     );
     return;
   }
 
-  glob.sync(PLUGIN_FILES).forEach((file) => {
+  glob.sync(PLUGIN_FILES).forEach(async (file) => {
     let dash = file.split("/");
     if (dash.length !== 4) {
       return;
@@ -30,12 +30,13 @@ function load(bot) {
       return;
     }
 
-    let module = require(file);
+    let fullModule = await import(file);
+    let module = fullModule?.default;
     let key = module.SLUG;
     let loaded = false;
 
-    if (!(key in configManager.config.plugins)) {
-      utils.logger.log(
+    if (!(key in config.plugins)) {
+      logger.log(
         "debug",
         `Not loading Plugin "${module.NAME}", as it's not enabled in the config.`
       );
@@ -43,39 +44,39 @@ function load(bot) {
     }
 
     if (module?.processCommand) {
-      utils.plugins.command[key] = module;
+      plugins.command[key] = module;
       loaded = true;
-      utils.logger.log("debug", `Loaded "${module.NAME}" as a Command Plugin`);
+      logger.log("debug", `Loaded "${module.NAME}" as a Command Plugin`);
     }
 
     if (module?.processMessage) {
-      utils.plugins.message[key] = module;
+      plugins.message[key] = module;
       loaded = true;
-      utils.logger.log("debug", `Loaded "${module.NAME}" as a Message Plugin`);
+      logger.log("debug", `Loaded "${module.NAME}" as a Message Plugin`);
     }
 
     if (module?.processReaction) {
-      utils.plugins.reaction[key] = module;
+      plugins.reaction[key] = module;
       loaded = true;
-      utils.logger.log("debug", `Loaded "${module.NAME}" as a Reaction Plugin`);
+      logger.log("debug", `Loaded "${module.NAME}" as a Reaction Plugin`);
     }
 
     if (module?.startCron) {
-      utils.plugins.cron[key] = module;
+      plugins.cron[key] = module;
       loaded = true;
-      utils.logger.log("debug", `Loaded "${module.NAME}" as a Cron Plugin`);
+      logger.log("debug", `Loaded "${module.NAME}" as a Cron Plugin`);
     }
 
     if (loaded && module?.onLoad) {
-      utils.logger.log("debug", `Running "${module.NAME}" onLoad function...`);
+      logger.log("debug", `Running "${module.NAME}" onLoad function...`);
       module.onLoad(bot);
     }
   });
 
-  utils.logger.log("debug", "All Plugins Loaded");
-  for (const [pluginType, list] of Object.entries(utils.plugins)) {
+  logger.log("debug", "All Plugins Loaded");
+  for (const [pluginType, list] of Object.entries(plugins)) {
     const pluginNames = Object.values(list).map((p) => `"${p.NAME}"`);
-    utils.logger.log(
+    logger.log(
       "debug",
       `${pluginType} plugins: ${pluginNames.join(", ")}`
     );
@@ -83,12 +84,12 @@ function load(bot) {
 }
 
 function startCrons() {
-  for (const plugin in utils.plugins.cron) {
-    utils.plugins.cron[plugin].startCron();
+  for (const plugin in plugins.cron) {
+    plugins.cron[plugin].startCron();
   }
 }
 
-module.exports = {
+export default {
   load,
   startCrons,
 };
