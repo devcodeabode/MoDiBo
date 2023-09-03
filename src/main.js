@@ -159,10 +159,14 @@ bot.on("ready", async () => {
     type = "PLAYING";
   } else {
     desc = config.activity.description || "nil";
-    type = (config.activity.type || "PLAYING").toUpperCase();
+    type = (config.activity.type || "Playing");
   }
-  bot.user.setActivity(desc, {
-    type: type,
+  bot.user.setPresence({
+    status: 'online',
+    activities: [{
+      name: desc,
+      type: ActivityType?.[type] ?? ActivityType.Playing
+    }]
   });
   pluginManager.load();
   logger.log("debug", "Starting Crons...");
