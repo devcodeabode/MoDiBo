@@ -140,3 +140,6 @@ dist
 # Plugins (These are to be handled in separate repos)
 plugins/*
 !plugins/README.md
+
+# Analytics DBs
+*.sqlite

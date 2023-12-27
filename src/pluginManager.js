@@ -69,7 +69,7 @@ function load(bot) {
 
     if (loaded && module?.onLoad) {
       logger.log("debug", `Running "${module.NAME}" onLoad function...`);
-      module.onLoad(bot);
+      await module.onLoad(bot);
     }
   });
 
