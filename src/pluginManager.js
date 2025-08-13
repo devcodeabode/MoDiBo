@@ -7,7 +7,7 @@ const PLUGIN_FILES = "../plugins/*/main.js";
  * Load plugin modules
  * @param {Discord.Client} bot The instantiated Discord Bot object, for use in calling module onLoad
  */
-function load(bot) {
+async function load(bot) {
   //TODO Integrate with Config to only load enabled plugins
 
   logger.log("debug", "Loading Plugins...");
@@ -18,8 +18,8 @@ function load(bot) {
     );
     return;
   }
-
-  glob.sync(PLUGIN_FILES).forEach(async (file) => {
+  const pluginFiles = glob.sync(PLUGIN_FILES);
+  const loadPromises = pluginFiles.map(async (file) => {
     let dash = file.split("/");
     if (dash.length !== 4) {
       return;
@@ -49,6 +49,15 @@ function load(bot) {
       logger.log("debug", `Loaded "${module.NAME}" as a Command Plugin`);
     }
 
+    if (module?.processSlashCommand) {
+      if (!plugins.slashCommand) {
+        plugins.slashCommand = {};
+      }
+      plugins.slashCommand[key] = module;
+      loaded = true;
+      logger.log("debug", `Loaded "${module.NAME}" as a Slash Command Plugin`);
+    }
+
     if (module?.processMessage) {
       plugins.message[key] = module;
       loaded = true;
@@ -73,14 +82,53 @@ function load(bot) {
     }
   });
 
+  await Promise.all(loadPromises);
+
   logger.log("debug", "All Plugins Loaded");
   for (const [pluginType, list] of Object.entries(plugins)) {
-    const pluginNames = Object.values(list).map((p) => `"${p.NAME}"`);
-    logger.log(
-      "debug",
-      `${pluginType} plugins: ${pluginNames.join(", ")}`
-    );
+    if (Object.keys(list).length > 0) {
+      const pluginNames = Object.values(list).map((p) => `"${p.NAME}"`);
+      logger.log(
+        "debug",
+        `${pluginType} plugins: ${pluginNames.join(", ")}`
+      );
+    } else {
+      logger.log("debug", `${pluginType} plugins: none`);
+    }
   }
+}
+
+/**
+ * Unload all plugins and clean up resources
+ * @param {Discord.Client} bot The instantiated Discord Bot object
+ */
+async function unload(bot) {
+  logger.log("debug", "Unloading Plugins...");
+  
+  const allPlugins = new Set();
+  
+  Object.values(plugins.command || {}).forEach(plugin => allPlugins.add(plugin));
+  Object.values(plugins.slashCommand || {}).forEach(plugin => allPlugins.add(plugin));
+  Object.values(plugins.message || {}).forEach(plugin => allPlugins.add(plugin));
+  Object.values(plugins.reaction || {}).forEach(plugin => allPlugins.add(plugin));
+  Object.values(plugins.cron || {}).forEach(plugin => allPlugins.add(plugin));
+  
+  for (const plugin of allPlugins) {
+    if (plugin?.onUnload) {
+      try {
+        logger.log("debug", `Running "${plugin.NAME}" onUnload function...`);
+        await plugin.onUnload(bot);
+      } catch (error) {
+        logger.error(`Error during "${plugin.NAME}" unload:`, error);
+      }
+    }
+  }
+  
+  Object.keys(plugins).forEach(key => {
+    plugins[key] = {};
+  });
+  
+  logger.log("debug", "All Plugins Unloaded");
 }
 
 function startCrons() {
@@ -91,5 +139,6 @@ function startCrons() {
 
 export default {
   load,
+  unload,
   startCrons,
 };
