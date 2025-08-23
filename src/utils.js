@@ -13,6 +13,34 @@ import {
 import { config } from './configManager.js';
 let logger;
 
+/**
+ * Sanitizes message data for logging by replacing file content with just filenames
+ * @param {Object} messageData - The message data to sanitize
+ * @returns {Object} Sanitized message data safe for logging
+ */
+function sanitizeMessageDataForLogging(messageData) {
+  if (!messageData || typeof messageData !== 'object') {
+    return messageData;
+  }
+  
+  const sanitized = { ...messageData };
+  
+  // Replace files array with just filenames
+  if (sanitized.files && Array.isArray(sanitized.files)) {
+    sanitized.files = sanitized.files.map(file => ({
+      name: file.name || 'unknown',
+      size: file.attachment ? file.attachment.length || 'unknown' : 'unknown'
+    }));
+  }
+  
+  // Replace any other file-like objects
+  if (sanitized.attachment) {
+    sanitized.attachment = '[FILE_DATA]';
+  }
+  
+  return sanitized;
+}
+
 const COLORS = {
   PURPLE: 0x510c76,
   RED: 0xfc0004,
@@ -38,6 +66,7 @@ const DEFAULT_MESSAGE = {
   content: "",
   embeds: [],
   components: [],
+  files: [],
 };
 
 /**
@@ -100,7 +129,7 @@ async function send(content, channel, bot, mention = null) {
   // prettier-ignore
   logger.log(
     "debug",
-    `Sending message to channel #${channelObj.name} : ${JSON.stringify(messageData)}`
+    `Sending message to channel #${channelObj.name} : ${JSON.stringify(sanitizeMessageDataForLogging(messageData))}`
   );
   await channelObj.send(messageData);
 }
@@ -111,6 +140,7 @@ async function send(content, channel, bot, mention = null) {
  * @param {string} content.content The string content of the message.
  * @param {EmbedBuilder[]} content.embeds Embeds for the message.
  * @param {ActionRowBuilder[]} content.components Components to attach to the message.
+ * @param {Array} [content.files] Files to attach to the message.
  * @param {boolean} [content.ephemeral=false] Only the sender sees this message.
  * @param {Message} message The message object to reply to.
  * @param {boolean} [mention=false] Mention the user you're replying to.
@@ -130,7 +160,7 @@ async function reply(content, message, mention = false) {
   // prettier-ignore
   logger.log(
     "debug",
-    `Replying to ${message.url} : ${JSON.stringify(messageData)}`
+    `Replying to ${message.url} : ${JSON.stringify(sanitizeMessageDataForLogging(messageData))}`
   );
   await message.reply(messageData);
 }
@@ -212,5 +242,6 @@ export {
   logger,
   plugins,
   removeUserReaction,
-  setLogger
+  setLogger,
+  sanitizeMessageDataForLogging
 };

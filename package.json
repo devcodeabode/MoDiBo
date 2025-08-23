@@ -4,8 +4,8 @@
   "description": "Modular Discord Bot",
   "main": "src/main.js",
   "scripts": {
-    "start": "cd src && node ./main.js",
-    "testing": "cd src && node  --trace-deprecation --trace-warnings ./main.js --testing",
+    "start": "cd src && node --no-warnings ./main.js",
+    "testing": "cd src && node --trace-deprecation --trace-warnings ./main.js --testing",
     "dev": "npm run testing",
     "update": "git checkout . && git checkout main && git pull && npm ci",
     "clean": "git reset --hard && git clean -fdx -e \".env\" -e \".env.testing\" -e \"*.log\" -e \"*-audit.json\" && git checkout main && git pull && npm ci",
