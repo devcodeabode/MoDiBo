@@ -191,6 +191,7 @@ const DEFAULT_EMBED = {
  * @param {string} options.additionalFields[].name Heading for the field
  * @param {string} options.additionalFields[].value Content for the field
  * @param {boolean} [options.additionalFields[].inline=false] Show inline with other fields. When false, forces field to be on own line.
+ * @param {string} [options.url] URL to set the embed header to
  * @returns {EmbedBuilder} Embed to send on via another function.
  */
 function createEmbed(options = DEFAULT_EMBED) {
@@ -212,7 +213,8 @@ function createEmbed(options = DEFAULT_EMBED) {
         : null
     )
     .setFooter({ text: options?.footer ? `${options.footer}` : null, iconURL: options.footerImageURL })
-    .addFields(...options["additionalFields"]);
+    .addFields(...options["additionalFields"])
+    .setURL(options?.url);
 }
 
 async function removeUserReaction(message, user, emojiName) {
