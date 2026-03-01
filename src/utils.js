@@ -45,7 +45,8 @@ const COLORS = {
   PURPLE: 0x510c76,
   RED: 0xfc0004,
   GREEN: 0x00fc00,
-  BLUE: 0x000088
+  BLUE: 0x000088,
+  GRAY: 0x808080
 };
 
 // Time Constants for convenience
